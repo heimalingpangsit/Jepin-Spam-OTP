@@ -232,8 +232,8 @@ TARGETS = [
             'Timestamp': '1788524034'
         },
         'payload': (
-            'firstName=Aku&'
-            'lastName=dimana&'
+            'firstName=Anak&'
+            'lastName=Kontol&'
             'phone={number}&'
             'email=test@gmail.com&'
             'birthDate=1994-09-04&'
@@ -318,7 +318,7 @@ TARGETS = [
             'X-Request-ID': 'web-a86d2f94-6382-46e0-a0bd-e946794b4e01',
             'User-Agent': 'Mozilla/5.0 (Linux; Android 10; K) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/152.0.0.0 Mobile Safari/537.36'
         },
-        'payload': '{"name":"Aku dimana","email":"mdjazarqy@gmail.com","phone":"+{number}","password":"Jepin28282811.","password_confirmation":"Jepin28282811.","plan_id":"01ky6hrxbmjmhznyvfj41hbnd3","referral_source":"code"}',
+        'payload': '{"name":"Kontol","email":"test@gmail.com","phone":"+{number}","password":"Jepin28282811.","password_confirmation":"Jepin28282811.","plan_id":"01ky6hrxbmjmhznyvfj41hbnd3","referral_source":"code"}',
         'number_fmt': fmt_08,
         'success_on': ['success', 'true', 'data']
     },
