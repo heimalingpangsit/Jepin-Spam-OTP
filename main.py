@@ -215,7 +215,7 @@ def print_banner(tick=0):
 
   ┌──────────────────────────────────────────────────────┐
   │  {color}API{reset}  : 24  │  {color}Version{reset}  : 1.0.0  │  {color}Dev{reset}  : Aldan     │
-  └──────────────────────────────────────────────────────┘{reset}
+  └──────────────────────────────────────────────────────{reset}
 """
     print(banner)
 
@@ -248,7 +248,7 @@ def print_menu(selected=0, tick=0):
     menu += f"""
   ┌──────────────────────────────────────────────────────┐
   │  {color1}↑/↓{reset}  : Navigasi  │  {color1}ENTER{reset}  : Pilih  │  {color1}Q{reset}  : Keluar  │
-  └──────────────────────────────────────────────────────┘{reset}
+  └──────────────────────────────────────────────────────{reset}
 """
     print(menu)
 
@@ -272,14 +272,14 @@ def input_with_animation(prompt, duration=2):
     start = time.time()
     
     print(f"\n{Fore.CYAN}╔{'═' * 50}╗{Style.RESET_ALL}")
-    print(f"{Fore.CYAN}║{Style.RESET_ALL}  {Fore.WHITE}📱 MASUKKAN NOMOR TARGET{Style.RESET_ALL}")
+    print(f"{Fore.CYAN}║{Style.RESET_ALL}  {Fore.WHITE}📱 MASUKKAN NOMOR TARGET (Bisa Multi, Pisah Koma){Style.RESET_ALL}")
     print(f"{Fore.CYAN}╚{'═' * 50}╝{Style.RESET_ALL}\n")
     
     while time.time() - start < duration:
         tick += 0.1
         color = rgb_color(tick)
         idx = int((time.time() - start) * 4) % 4
-        sys.stdout.write(f'\r{Fore.GREEN}  ┌─{Fore.YELLOW} Masukkan nomor target {color}{chars[idx]}{Style.RESET_ALL}')
+        sys.stdout.write(f'\r{Fore.GREEN}  ┌─{Fore.YELLOW} Masukkan nomor (cth: 081..., 082...) {color}{chars[idx]}{Style.RESET_ALL}')
         sys.stdout.flush()
         time.sleep(0.05)
     
@@ -433,51 +433,67 @@ def menu_navigation():
                     choice = items[selected]
                     if choice == "single":
                         clear_screen()
-                        target = input_with_animation("Masukkan nomor target", 1)
-                        if not target:
+                        raw_input_target = input_with_animation("Masukkan nomor target", 1)
+                        if not raw_input_target:
                             print(f"\n{Fore.RED}✗ Nomor tidak boleh kosong!{Style.RESET_ALL}")
                             time.sleep(1)
                             continue
                         
-                        print_loading_animation("Memulai Single Round", 1)
+                        numbers = [n.strip() for n in re.split(r'[, ]+', raw_input_target) if n.strip()]
+                        if not numbers:
+                            continue
+                        
+                        print_loading_animation(f"Memproses {len(numbers)} nomor", 1)
                         clear_screen()
                         
-                        print(f"\n{Fore.YELLOW}⚠️  Menjalankan Single Round...{Style.RESET_ALL}")
-                        print(f"{Fore.CYAN}   Tekan {Fore.RED}CTRL+C{Fore.CYAN} untuk berhenti{Style.RESET_ALL}")
-                        print()
-                        time.sleep(0.5)
+                        for idx, target in enumerate(numbers):
+                            print(f"\n{Fore.YELLOW}⚠️  Menjalankan Single Round untuk nomor [{idx+1}/{len(numbers)}]: {target}{Style.RESET_ALL}")
+                            print(f"{Fore.CYAN}   Tekan {Fore.RED}CTRL+C{Fore.CYAN} untuk melewati/berhenti{Style.RESET_ALL}")
+                            print()
+                            time.sleep(0.5)
+                            
+                            try:
+                                run_with_ui(run_single_round, target, threads=5)
+                            except KeyboardInterrupt:
+                                print(f"\n\n{Fore.YELLOW}⚠️ Proses dihentikan oleh user{Style.RESET_ALL}")
+                                break
                         
-                        try:
-                            run_with_ui(run_single_round, target, threads=5)
-                        except KeyboardInterrupt:
-                            print(f"\n\n{Fore.YELLOW}⚠️ Proses dihentikan oleh user{Style.RESET_ALL}")
-                        
-                        print(f"\n{Fore.GREEN}✓ Proses selesai!{Style.RESET_ALL}")
+                        print(f"\n{Fore.GREEN}✓ Semua nomor selesai diproses!{Style.RESET_ALL}")
                         print(f"\n{Fore.YELLOW}⏎ Tekan Enter untuk kembali...{Style.RESET_ALL}")
                         input()
                         
                     elif choice == "infinite":
                         clear_screen()
-                        target = input_with_animation("Masukkan nomor target", 1)
-                        if not target:
+                        raw_input_target = input_with_animation("Masukkan nomor target", 1)
+                        if not raw_input_target:
                             print(f"\n{Fore.RED}✗ Nomor tidak boleh kosong!{Style.RESET_ALL}")
                             time.sleep(1)
                             continue
                         
-                        print_loading_animation("Memulai Infinite Loop", 1)
+                        numbers = [n.strip() for n in re.split(r'[, ]+', raw_input_target) if n.strip()]
+                        if not numbers:
+                            continue
+                        
+                        print_loading_animation(f"Memulai Infinite Loop untuk {len(numbers)} nomor", 1)
                         clear_screen()
                         
-                        print(f"\n{Fore.YELLOW}⚠️  Mode Infinite Loop akan berjalan terus menerus{Style.RESET_ALL}")
-                        print(f"{Fore.YELLOW}   Tekan {Fore.RED}CTRL+C{Fore.YELLOW} untuk berhenti{Style.RESET_ALL}")
+                        print(f"\n{Fore.YELLOW}⚠️  Mode Infinite Loop Unlimited berjalan untuk {len(numbers)} nomor{Style.RESET_ALL}")
+                        print(f"{Fore.YELLOW}   Tekan {Fore.RED}CTRL+C{Fore.YELLOW} untuk berhenti kapan saja{Style.RESET_ALL}")
                         print()
                         time.sleep(1)
                         
                         try:
-                            run_with_ui(run_infinite_loop, target, threads=5)
+                            # Loop tak terbatas yang memutar nomor secara terus menerus
+                            while True:
+                                for target in numbers:
+                                    try:
+                                        run_with_ui(run_single_round, target, threads=5)
+                                    except KeyboardInterrupt:
+                                        raise
                         except KeyboardInterrupt:
-                            print(f"\n\n{Fore.YELLOW}⚠️ Proses dihentikan oleh user{Style.RESET_ALL}")
+                            print(f"\n\n{Fore.YELLOW}⚠️ Mode Infinite Loop dihentikan oleh user!{Style.RESET_ALL}")
                         
-                        print(f"\n{Fore.GREEN}✓ Proses selesai!{Style.RESET_ALL}")
+                        print(f"\n{Fore.GREEN}✓ Keluar dari Infinite Loop.{Style.RESET_ALL}")
                         print(f"\n{Fore.YELLOW}⏎ Tekan Enter untuk kembali...{Style.RESET_ALL}")
                         input()
                         
@@ -501,38 +517,50 @@ def menu_navigation():
                 
                 if choice == "1":
                     clear_screen()
-                    target = input(f"{Fore.WHITE}Nomor target (08xx): {Style.RESET_ALL}").strip()
-                    if not target:
+                    raw_input_target = input(f"{Fore.WHITE}Nomor target (pisahkan koma, cth: 081..., 082...): {Style.RESET_ALL}").strip()
+                    if not raw_input_target:
                         print(f"\n{Fore.RED}✗ Nomor tidak boleh kosong!{Style.RESET_ALL}")
                         time.sleep(1)
                         continue
                     
-                    try:
-                        run_with_ui(run_single_round, target, threads=5)
-                    except KeyboardInterrupt:
-                        print(f"\n\n{Fore.YELLOW}⚠️ Proses dihentikan oleh user{Style.RESET_ALL}")
+                    numbers = [n.strip() for n in re.split(r'[, ]+', raw_input_target) if n.strip()]
                     
-                    print(f"\n{Fore.GREEN}✓ Proses selesai!{Style.RESET_ALL}")
+                    for idx, target in enumerate(numbers):
+                        print(f"\n{Fore.YELLOW}⚠️  Menjalankan Single Round [{idx+1}/{len(numbers)}]: {target}{Style.RESET_ALL}")
+                        try:
+                            run_with_ui(run_single_round, target, threads=5)
+                        except KeyboardInterrupt:
+                            print(f"\n\n{Fore.YELLOW}⚠️ Proses dihentikan oleh user{Style.RESET_ALL}")
+                            break
+                    
+                    print(f"\n{Fore.GREEN}✓ Semua proses selesai!{Style.RESET_ALL}")
                     print(f"\n{Fore.YELLOW}⏎ Tekan Enter untuk kembali...{Style.RESET_ALL}")
                     input()
                     
                 elif choice == "2":
                     clear_screen()
-                    target = input(f"{Fore.WHITE}Nomor target (08xx): {Style.RESET_ALL}").strip()
-                    if not target:
+                    raw_input_target = input(f"{Fore.WHITE}Nomor target (pisahkan koma, cth: 081..., 082...): {Style.RESET_ALL}").strip()
+                    if not raw_input_target:
                         print(f"\n{Fore.RED}✗ Nomor tidak boleh kosong!{Style.RESET_ALL}")
                         time.sleep(1)
                         continue
                     
-                    print(f"\n{Fore.YELLOW}⚠️  Mode Infinite Loop akan berjalan terus menerus{Style.RESET_ALL}")
+                    numbers = [n.strip() for n in re.split(r'[, ]+', raw_input_target) if n.strip()]
+                    
+                    print(f"\n{Fore.YELLOW}⚠️  Mode Infinite Loop Unlimited akan berjalan terus menerus{Style.RESET_ALL}")
                     print(f"{Fore.YELLOW}   Tekan {Fore.RED}CTRL+C{Fore.YELLOW} untuk berhenti{Style.RESET_ALL}")
                     print()
                     time.sleep(1)
                     
                     try:
-                        run_with_ui(run_infinite_loop, target, threads=5)
+                        while True:
+                            for target in numbers:
+                                try:
+                                    run_with_ui(run_single_round, target, threads=5)
+                                except KeyboardInterrupt:
+                                    raise
                     except KeyboardInterrupt:
-                        print(f"\n\n{Fore.YELLOW}⚠️ Proses dihentikan oleh user{Style.RESET_ALL}")
+                        print(f"\n\n{Fore.YELLOW}⚠️ Mode Infinite Loop dihentikan oleh user!{Style.RESET_ALL}")
                     
                     print(f"\n{Fore.GREEN}✓ Proses selesai!{Style.RESET_ALL}")
                     print(f"\n{Fore.YELLOW}⏎ Tekan Enter untuk kembali...{Style.RESET_ALL}")
